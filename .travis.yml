@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+language: java
+jdk:
+  - openjdk8
+env:
+  global:
+    - COMMIT=${TRAVIS_COMMIT::7}
+
+cache:
+  directories:
+    - $HOME/.m2
+
+script:
+  - echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
+  - export IMAGE_NAME=cloudstark/kafka-connect-jdbc
+  - docker build -f $TRAVIS_BUILD_DIR/Dockerfile -t $IMAGE_NAME:$COMMIT $TRAVIS_BUILD_DIR
+  - docker tag $IMAGE_NAME:$COMMIT $IMAGE_NAME:$TAG
+  - docker push $IMAGE_NAME
