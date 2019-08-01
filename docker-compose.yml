@@ -1,0 +1,71 @@
+version: "2"
+services:
+  postgres:
+    image: postgres:9.6.11
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+  connect-jdbc:
+    build:
+      context: ./
+    #image: cloudstark/kafka-connect-jdbc:latest
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "kafka:9092"
+      CONNECT_GROUP_ID: "connect-jdbc"
+      CONNECT_CONFIG_STORAGE_TOPIC: "connect-jdbc-config"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_TOPIC: "connect-jdbc-offset"
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: "connect-jdbc-status"
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "connect-jdbc"
+      CONNECT_REST_PORT: 8083
+      SECRETS_PROVIDER: "env"
+      CONNECTOR_NAME: "connect-jdbc"
+      CONNECTOR_CONNECTOR_CLASS: "io.confluent.connect.jdbc.JdbcSourceConnector"
+      CONNECTOR_TASKS_MAX: 1
+      CONNECTOR_DIALECT_NAME: "PostgreSqlDatabaseDialect"
+      CONNECTOR_CONNECTION_URL: "jdbc:postgresql://postgres:5432/postgres"
+      CONNECTOR_CONNECTION_USER: "postgres"
+      CONNECTOR_CONNECTION_PASSWORD: "postgres"
+      CONNECTOR_MODE: "bulk"
+      CONNECTOR_TOPIC_PREFIX: "demo"
+      CONNECTOR_QUERY: "SELECT * FROM demo"
+    depends_on:
+      - kafka
+      - postgres
+    ports:
+      - "8083:8083"
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.2.2
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+  kafka:
+    image: confluentinc/cp-kafka:5.2.2
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ADVERTISED_LISTENERS: "plaintext://kafka:9092"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  schema-registry:
+    image: confluentinc/cp-schema-registry:5.2.2
+    depends_on:
+      - kafka
+      - zookeeper
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: "zookeeper:2181"
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
