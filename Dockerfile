@@ -19,8 +19,9 @@ ARG KAFKA_CONNECT_JDBC_VERSION="5.2.1"
 
 COPY --from=builder /root/kafka-connect-jdbc/target/kafka-connect-jdbc-${KAFKA_CONNECT_JDBC_VERSION}.jar /opt/lenses/lib
 
-RUN cd /opt/lenses/lib && \
-	curl https://search.maven.org/remotecontent?filepath=com/microsoft/sqlserver/mssql-jdbc/7.0.0.jre8/mssql-jdbc-7.0.0.jre8.jar -O && \
-	curl https://search.maven.org/remotecontent?filepath=org/postgresql/postgresql/42.2.5/postgresql-42.2.5.jar -O
+RUN cd /usr/share/java/kafka && \
+	curl -sSL https://search.maven.org/remotecontent?filepath=com/microsoft/sqlserver/mssql-jdbc/7.4.1.jre8/mssql-jdbc-7.4.1.jre8.jar -O && \
+	curl -sSL https://search.maven.org/remotecontent?filepath=org/postgresql/postgresql/42.2.5/postgresql-42.2.5.jar -O && \
+	curl -sSL https://search.maven.org/remotecontent?filepath=mysql/mysql-connector-java/8.0.19/mysql-connector-java-8.0.19.jar -O
 
 CMD ["dumb-init", "/opt/lenses/bin/entry-point"]
