@@ -13,7 +13,7 @@ RUN sed -e "s/\${confluent.maven.repo}/https\:\/\/packages.confluent.io\/maven\/
 RUN mv pom.tmp.xml pom.xml
 RUN mvn clean package -DskipTests=true
 
-FROM streamreactor/stream-reactor-base:1.2.1
+FROM streamreactor/stream-reactor-base:1.2.3
 
 ARG KAFKA_CONNECT_JDBC_VERSION="5.2.1"
 
