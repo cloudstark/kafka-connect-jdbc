@@ -1,6 +1,6 @@
 FROM maven:3.5-jdk-8-alpine AS builder
 
-ARG KAFKA_CONNECT_JDBC_VERSION="5.2.1"
+ARG KAFKA_CONNECT_JDBC_VERSION="5.4.0"
 ARG KAFKA_CONNECT_JDBC_TAG=v${KAFKA_CONNECT_JDBC_VERSION}
 
 RUN apk add git
@@ -25,7 +25,7 @@ RUN mvn clean package -DskipTests=true
 
 FROM streamreactor/stream-reactor-base:1.2.3
 
-ARG KAFKA_CONNECT_JDBC_VERSION="5.2.1"
+ARG KAFKA_CONNECT_JDBC_VERSION="5.4.0"
 
 COPY --from=builder /root/kafka-connect-jdbc/target/kafka-connect-jdbc-${KAFKA_CONNECT_JDBC_VERSION}.jar /opt/lenses/lib
 COPY --from=builder2 /root/kafka-connect-append-schema/target/AppendSchema-1.0-SNAPSHOT.jar /usr/share/java/kafka
