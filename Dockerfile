@@ -13,11 +13,22 @@ RUN sed -e "s/\${confluent.maven.repo}/https\:\/\/packages.confluent.io\/maven\/
 RUN mv pom.tmp.xml pom.xml
 RUN mvn clean package -DskipTests=true
 
+FROM maven:3.5-jdk-8-alpine AS builder2
+
+RUN apk add git
+
+WORKDIR /root
+
+RUN git clone https://github.com/yousufdev/kafka-connect-append-schema.git
+WORKDIR kafka-connect-append-schema
+RUN mvn clean package -DskipTests=true
+
 FROM streamreactor/stream-reactor-base:1.2.3
 
 ARG KAFKA_CONNECT_JDBC_VERSION="5.2.1"
 
 COPY --from=builder /root/kafka-connect-jdbc/target/kafka-connect-jdbc-${KAFKA_CONNECT_JDBC_VERSION}.jar /opt/lenses/lib
+COPY --from=builder2 /root/kafka-connect-append-schema/target/AppendSchema-1.0-SNAPSHOT.jar /usr/share/java/kafka
 
 RUN cd /usr/share/java/kafka && \
 	curl -sSL https://search.maven.org/remotecontent?filepath=com/microsoft/sqlserver/mssql-jdbc/7.4.1.jre8/mssql-jdbc-7.4.1.jre8.jar -O && \
