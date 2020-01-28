@@ -10,7 +10,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./init/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+      - ./init/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./init/insert.sql:/docker-entrypoint-initdb.d/2-insert.sql
   connect-jdbc:
     build:
       context: ./
